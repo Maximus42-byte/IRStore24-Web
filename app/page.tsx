@@ -22,11 +22,11 @@ export default function Home() {
         />
 
         <a
-          href="https://discord.gg/YOUR_DISCORD_INVITE"
+          href="https://www.instagram.com/irstore_community?igsh=MTZjYzk2bWFqNTdsbg%3D%3D&utm_source=qr"
           target="_blank"
           rel="noopener noreferrer"
           className="hotspot discord"
-          aria-label="Discord"
+          aria-label="Instagram"
         />
 
       </div>
