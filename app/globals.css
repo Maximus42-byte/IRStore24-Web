@@ -29,10 +29,8 @@ body {
 
 .poster {
   position: relative;
-
-  width: min(100vw, 1672px);
-
-  aspect-ratio: 1672 / 941;
+  width: min(100vw, 1536px);
+  aspect-ratio: 1536 / 1024;
 }
 
 .posterImage {
@@ -53,7 +51,7 @@ body {
 
 .telegram {
   left: 31.7%;
-  top: 78%;
+  top: 66%;
 
   width: 18.36%;
   height: 9.88%;
@@ -61,7 +59,7 @@ body {
 
 .discord {
   left: 52.87%;
-  top: 78%;
+  top: 66%;
 
   width: 18.36%;
   height: 9.88%;
