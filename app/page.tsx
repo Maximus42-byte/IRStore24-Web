@@ -1,35 +1,30 @@
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="landing">
-      <div className="poster">
+    <>
+      <section>
+        <h1>IRStore24</h1>
+        <p>خرید و فروش آیتم‌های CS2 و کلیدهای TF2</p>
 
-        <Image
-          src="/construction-bg.png"
-          alt="IRStore24 Under Construction"
-          fill
-          priority
-          className="posterImage"
-        />
+        <Link href="/cs2-items">
+          مشاهده آیتم‌های CS2
+        </Link>
+      </section>
 
-        <a
-          href="https://t.me/IRStoore"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hotspot telegram"
-          aria-label="Telegram"
-        />
+      <section>
+        <h2>آیتم‌های CS2</h2>
+        <p>آیتم‌های جدید و موجود فروشگاه در این بخش نمایش داده خواهند شد.</p>
+      </section>
 
-        <a
-          href="https://www.instagram.com/irstore_community?igsh=MTZjYzk2bWFqNTdsbg%3D%3D&utm_source=qr"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hotspot discord"
-          aria-label="Instagram"
-        />
+      <section>
+        <h2>کلید TF2</h2>
+        <p>قیمت خرید، فروش و موجودی کلیدهای TF2.</p>
 
-      </div>
-    </main>
+        <Link href="/tf2-keys">
+          مشاهده کلید TF2
+        </Link>
+      </section>
+    </>
   );
 }
