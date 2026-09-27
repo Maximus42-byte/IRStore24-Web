@@ -1,0 +1,166 @@
+.page {
+  width: min(calc(100% - 32px), var(--container-width));
+  margin-inline: auto;
+  padding-block: 56px 90px;
+}
+
+.header {
+  max-width: 720px;
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  display: inline-flex;
+
+  margin-bottom: 12px;
+  padding: 6px 10px;
+
+  color: var(--accent);
+
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 999px;
+
+  background: rgba(245, 158, 11, 0.08);
+
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.title {
+  margin: 0;
+
+  font-size: clamp(2rem, 5vw, 3.2rem);
+}
+
+.description {
+  margin: 14px 0 0;
+
+  color: var(--text-muted);
+
+  line-height: 2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.card {
+  padding: 28px;
+
+  border: 1px solid var(--border);
+  border-radius: 22px;
+
+  background: var(--surface);
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+.icon {
+  width: 58px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 22px;
+
+  color: var(--accent);
+
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  border-radius: 16px;
+
+  background: rgba(245, 158, 11, 0.08);
+
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.cardTitle {
+  margin: 0;
+
+  font-size: 1.35rem;
+}
+
+.cardDescription {
+  margin: 12px 0 0;
+
+  color: var(--text-muted);
+
+  line-height: 1.9;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+
+  margin-top: 24px;
+  padding: 9px 16px;
+
+  color: #111827;
+
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+
+  background: var(--accent);
+
+  font-weight: 800;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.action:hover {
+  background: var(--accent-hover);
+
+  transform: translateY(-2px);
+}
+
+.notice {
+  margin-top: 26px;
+
+  padding: 20px;
+
+  color: var(--text-muted);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: rgba(7, 17, 29, 0.6);
+
+  line-height: 1.9;
+}
+.socialIcon {
+  width: 26px;
+  height: 26px;
+
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .page {
+    width: min(calc(100% - 20px), var(--container-width));
+
+    padding-top: 36px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
