@@ -3,101 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "../../app/cs2-items/page.module.css";
-
-type CS2Item = {
-  id: number;
-  slug: string;
-  name: string;
-  weapon: string;
-  exterior: string;
-  floatValue: number;
-  stockQuantity: number;
-  sellPriceToman: number;
-  sellPriceUsdt: number;
-  buyPriceToman: number;
-  buyPriceUsdt: number;
-};
-
-const items: CS2Item[] = [
-  {
-    id: 1,
-    slug: "ak47-redline-ft",
-    name: "AK-47 | Redline",
-    weapon: "AK-47",
-    exterior: "Field-Tested",
-    floatValue: 0.231284,
-    stockQuantity: 3,
-    sellPriceToman: 8500000,
-    sellPriceUsdt: 85,
-    buyPriceToman: 7500000,
-    buyPriceUsdt: 75,
-  },
-  {
-    id: 2,
-    slug: "awp-asiimov-ft",
-    name: "AWP | Asiimov",
-    weapon: "AWP",
-    exterior: "Field-Tested",
-    floatValue: 0.284901,
-    stockQuantity: 2,
-    sellPriceToman: 12000000,
-    sellPriceUsdt: 120,
-    buyPriceToman: 10500000,
-    buyPriceUsdt: 105,
-  },
-  {
-    id: 3,
-    slug: "m4a1s-printstream-mw",
-    name: "M4A1-S | Printstream",
-    weapon: "M4A1-S",
-    exterior: "Minimal Wear",
-    floatValue: 0.094815,
-    stockQuantity: 1,
-    sellPriceToman: 10200000,
-    sellPriceUsdt: 102,
-    buyPriceToman: 9000000,
-    buyPriceUsdt: 90,
-  },
-  {
-    id: 4,
-    slug: "glock-vogue-fn",
-    name: "Glock-18 | Vogue",
-    weapon: "Glock-18",
-    exterior: "Factory New",
-    floatValue: 0.047321,
-    stockQuantity: 4,
-    sellPriceToman: 3100000,
-    sellPriceUsdt: 31,
-    buyPriceToman: 2700000,
-    buyPriceUsdt: 27,
-  },
-  {
-    id: 5,
-    slug: "usp-s-kill-confirmed-bs",
-    name: "USP-S | Kill Confirmed",
-    weapon: "USP-S",
-    exterior: "Battle-Scarred",
-    floatValue: 0.612544,
-    stockQuantity: 0,
-    sellPriceToman: 5200000,
-    sellPriceUsdt: 52,
-    buyPriceToman: 4400000,
-    buyPriceUsdt: 44,
-  },
-  {
-    id: 6,
-    slug: "desert-eagle-printstream-ww",
-    name: "Desert Eagle | Printstream",
-    weapon: "Desert Eagle",
-    exterior: "Well-Worn",
-    floatValue: 0.417831,
-    stockQuantity: 2,
-    sellPriceToman: 6800000,
-    sellPriceUsdt: 68,
-    buyPriceToman: 5900000,
-    buyPriceUsdt: 59,
-  },
-];
+import { mockCs2Items } from "../../data/mockCs2Items";
 
 const exteriorOptions = [
   "Factory New",
@@ -123,12 +29,12 @@ export default function CS2Catalog() {
   const [sort, setSort] = useState("default");
 
   const weapons = useMemo(
-    () => Array.from(new Set(items.map((item) => item.weapon))).sort(),
+    () => Array.from(new Set(mockCs2Items.map((item) => item.weapon))).sort(),
     [],
   );
 
   const filteredItems = useMemo(() => {
-    const result = items.filter((item) => {
+    const result = mockCs2Items.filter((item) => {
       const normalizedSearch = search.trim().toLowerCase();
 
       if (
