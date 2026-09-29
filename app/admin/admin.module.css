@@ -741,6 +741,105 @@
   font-weight: 900;
 }
 
+.orderStatus {
+  display: inline-flex;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  white-space: nowrap;
+
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.orderStatusPending {
+  color: var(--accent);
+
+  border: 1px solid rgba(245, 158, 11, 0.28);
+
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.orderStatusConfirmed {
+  color: var(--success);
+
+  border: 1px solid rgba(34, 197, 94, 0.25);
+
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.orderStatusCancelled {
+  color: var(--danger);
+
+  border: 1px solid rgba(239, 68, 68, 0.25);
+
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.orderStatusExpired {
+  color: var(--text-muted);
+
+  border: 1px solid var(--border);
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.orderActions {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+}
+
+.viewOrderButton,
+.confirmOrderButton,
+.cancelOrderButton {
+  min-height: 32px;
+
+  padding-inline: 10px;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  font-size: 0.67rem;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.viewOrderButton {
+  color: var(--text);
+
+  border: 1px solid var(--border);
+}
+
+.confirmOrderButton {
+  color: var(--success);
+
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.cancelOrderButton {
+  color: var(--danger);
+
+  border: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+.viewOrderButton:hover {
+  background: var(--surface-hover);
+}
+
+.confirmOrderButton:hover {
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.cancelOrderButton:hover {
+  background: rgba(239, 68, 68, 0.07);
+}
+
 @media (max-width: 700px) {
   .formGrid {
     grid-template-columns: 1fr;
