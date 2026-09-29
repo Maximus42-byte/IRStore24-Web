@@ -21,6 +21,7 @@ type CS2ItemFormValues = {
   exterior: string;
   floatValue: string;
   stockQuantity: string;
+  isActive: boolean;
   sellPriceToman: string;
   sellPriceUsdt: string;
   buyPriceToman: string;
@@ -40,6 +41,7 @@ const emptyValues: CS2ItemFormValues = {
   exterior: "Field-Tested",
   floatValue: "",
   stockQuantity: "0",
+  isActive: true,
   sellPriceToman: "",
   sellPriceUsdt: "",
   buyPriceToman: "",
@@ -63,6 +65,13 @@ export default function CS2ItemForm({
     setValues((current) => ({
       ...current,
       [field]: value,
+    }));
+  }
+
+  function updateActive(value: boolean) {
+    setValues((current) => ({
+      ...current,
+      isActive: value,
     }));
   }
 
@@ -271,6 +280,27 @@ export default function CS2ItemForm({
                 )
               }
             />
+          </div>
+
+          <div
+            className={`${styles.formField} ${styles.formFieldFull}`}
+          >
+            <label className={styles.adminCheckboxRow}>
+              <input
+                type="checkbox"
+                checked={values.isActive}
+                onChange={(event) =>
+                  updateActive(event.target.checked)
+                }
+              />
+
+              نمایش آیتم در فروشگاه
+            </label>
+
+            <span className={styles.formFieldHint}>
+              اگر غیرفعال باشد، آیتم در Catalog عمومی نمایش داده
+              نمی‌شود و صفحه عمومی آن نیز در دسترس نخواهد بود.
+            </span>
           </div>
         </div>
       </section>

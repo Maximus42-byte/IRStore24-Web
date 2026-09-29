@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "../../app/cs2-items/page.module.css";
-import { mockCs2Items } from "../../data/mockCs2Items";
+import { publicMockCs2Items } from "../../data/mockCs2Items";
 
 const exteriorOptions = [
   "Factory New",
@@ -29,12 +29,12 @@ export default function CS2Catalog() {
   const [sort, setSort] = useState("default");
 
   const weapons = useMemo(
-    () => Array.from(new Set(mockCs2Items.map((item) => item.weapon))).sort(),
+    () => Array.from(new Set(publicMockCs2Items.map((item) => item.weapon))).sort(),
     [],
   );
 
   const filteredItems = useMemo(() => {
-    const result = mockCs2Items.filter((item) => {
+    const result = publicMockCs2Items.filter((item) => {
       const normalizedSearch = search.trim().toLowerCase();
 
       if (

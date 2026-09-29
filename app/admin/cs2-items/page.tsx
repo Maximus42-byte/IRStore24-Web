@@ -13,11 +13,16 @@ export default function AdminCs2ItemsPage() {
   );
 
   const availableItems = mockCs2Items.filter(
-    (item) => item.stockQuantity > 0,
+    (item) => 
+      item.isActive &&
+      item.stockQuantity > 0,
   ).length;
 
-  const outOfStockItems =
-    mockCs2Items.length - availableItems;
+  const outOfStockItems = mockCs2Items.filter(
+  (item) =>
+    item.isActive &&
+    item.stockQuantity === 0,
+).length;
 
   return (
     <>
@@ -135,6 +140,7 @@ export default function AdminCs2ItemsPage() {
             <tbody>
               {mockCs2Items.map((item) => {
                 const available =
+                  item.isActive &&
                   item.stockQuantity > 0;
 
                 return (
@@ -241,14 +247,18 @@ export default function AdminCs2ItemsPage() {
                     <td>
                       <span
                         className={
-                          available
-                            ? styles.statusAvailable
-                            : styles.statusUnavailable
+                          !item.isActive
+                            ? styles.statusHidden
+                            : item.stockQuantity > 0
+                              ? styles.statusAvailable
+                              : styles.statusUnavailable
                         }
                       >
-                        {available
-                          ? "موجود"
-                          : "ناموجود"}
+                        {!item.isActive
+                          ? "مخفی"
+                          : item.stockQuantity > 0
+                            ? "موجود"
+                            : "ناموجود"}
                       </span>
                     </td>
 
@@ -270,9 +280,11 @@ export default function AdminCs2ItemsPage() {
                           className={
                             styles.hideButton
                           }
-                          title="بعداً به is_active در Backend متصل می‌شود"
+                            title="ذخیره واقعی این تغییر بعداً توسط FastAPI انجام می‌شود"
                         >
-                          مخفی‌سازی
+                          {item.isActive
+                            ? "مخفی‌سازی"
+                            : "فعال‌سازی"}
                         </button>
                       </div>
                     </td>

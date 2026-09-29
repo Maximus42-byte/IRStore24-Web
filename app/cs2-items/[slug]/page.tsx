@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import ItemPurchaseActions from "../../../components/store/ItemPurchaseActions";
 import {
   getMockCs2ItemBySlug,
-  mockCs2Items,
+  publicMockCs2Items,
 } from "../../../data/mockCs2Items";
 
 import styles from "./page.module.css";
@@ -20,7 +20,7 @@ function formatToman(value: number) {
 }
 
 export function generateStaticParams() {
-  return mockCs2Items.map((item) => ({
+  return publicMockCs2Items.map((item) => ({
     slug: item.slug,
   }));
 }
@@ -32,7 +32,7 @@ export default async function CS2ItemPage({
 
   const item = getMockCs2ItemBySlug(slug);
 
-  if (!item) {
+  if (!item || !item.isActive) {
     notFound();
   }
 

@@ -7,6 +7,7 @@ export type CS2Item = {
   exterior: string;
   floatValue: number;
   stockQuantity: number;
+  isActive: boolean;
 
   sellPriceToman: number;
   sellPriceUsdt: number;
@@ -26,6 +27,7 @@ export const mockCs2Items: CS2Item[] = [
     exterior: "Field-Tested",
     floatValue: 0.231284,
     stockQuantity: 3,
+    isActive: true,
 
     sellPriceToman: 8500000,
     sellPriceUsdt: 85,
@@ -43,6 +45,7 @@ export const mockCs2Items: CS2Item[] = [
     exterior: "Field-Tested",
     floatValue: 0.284901,
     stockQuantity: 2,
+    isActive: true,
 
     sellPriceToman: 12000000,
     sellPriceUsdt: 120,
@@ -60,6 +63,7 @@ export const mockCs2Items: CS2Item[] = [
     exterior: "Minimal Wear",
     floatValue: 0.094815,
     stockQuantity: 1,
+    isActive: true,
 
     sellPriceToman: 10200000,
     sellPriceUsdt: 102,
@@ -77,6 +81,7 @@ export const mockCs2Items: CS2Item[] = [
     exterior: "Factory New",
     floatValue: 0.047321,
     stockQuantity: 4,
+    isActive: true,
 
     sellPriceToman: 3100000,
     sellPriceUsdt: 31,
@@ -94,6 +99,7 @@ export const mockCs2Items: CS2Item[] = [
     exterior: "Battle-Scarred",
     floatValue: 0.612544,
     stockQuantity: 0,
+    isActive: true,
 
     sellPriceToman: 5200000,
     sellPriceUsdt: 52,
@@ -111,6 +117,7 @@ export const mockCs2Items: CS2Item[] = [
     exterior: "Well-Worn",
     floatValue: 0.417831,
     stockQuantity: 2,
+    isActive: true,
 
     sellPriceToman: 6800000,
     sellPriceUsdt: 68,
@@ -120,6 +127,13 @@ export const mockCs2Items: CS2Item[] = [
   },
 ];
 
-export function getMockCs2ItemBySlug(slug: string) {
-  return mockCs2Items.find((item) => item.slug === slug);
+export const publicMockCs2Items =
+  mockCs2Items.filter((item) => item.isActive);
+
+export function getMockCs2ItemBySlug(
+  slug: string,
+) {
+  return mockCs2Items.find(
+    (item) => item.slug === slug,
+  );
 }

@@ -48,6 +48,7 @@ export default async function EditCS2ItemPage({
           exterior: item.exterior,
           floatValue: String(item.floatValue),
           stockQuantity: String(item.stockQuantity),
+          isActive: item.isActive,
           sellPriceToman: String(item.sellPriceToman),
           sellPriceUsdt: String(item.sellPriceUsdt),
           buyPriceToman: String(item.buyPriceToman),
