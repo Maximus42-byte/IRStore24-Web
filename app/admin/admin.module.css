@@ -840,6 +840,150 @@
   background: rgba(239, 68, 68, 0.07);
 }
 
+.userRoleAdmin,
+.userRoleUser,
+.userStatusActive,
+.userStatusInactive,
+.userBanNone,
+.userBanTemporary,
+.userBanPermanent {
+  display: inline-flex;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  white-space: nowrap;
+
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.userRoleAdmin {
+  color: var(--accent);
+
+  border: 1px solid rgba(245, 158, 11, 0.28);
+
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.userRoleUser {
+  color: var(--text-muted);
+
+  border: 1px solid var(--border);
+
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.userStatusActive {
+  color: var(--success);
+
+  border: 1px solid rgba(34, 197, 94, 0.25);
+
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.userStatusInactive {
+  color: var(--text-muted);
+
+  border: 1px solid var(--border);
+
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.userBanNone {
+  color: var(--success);
+
+  border: 1px solid rgba(34, 197, 94, 0.25);
+
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.userBanTemporary {
+  color: var(--accent);
+
+  border: 1px solid rgba(245, 158, 11, 0.28);
+
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.userBanPermanent {
+  color: var(--danger);
+
+  border: 1px solid rgba(239, 68, 68, 0.28);
+
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.userBanReason {
+  display: block;
+
+  max-width: 180px;
+
+  margin-top: 5px;
+
+  color: var(--text-muted);
+
+  font-size: 0.62rem;
+  line-height: 1.5;
+}
+
+.userActions {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+}
+
+.banUserButton,
+.unbanUserButton,
+.deactivateUserButton {
+  min-height: 32px;
+
+  padding-inline: 10px;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  font-size: 0.66rem;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.banUserButton {
+  color: var(--danger);
+
+  border: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+.unbanUserButton {
+  color: var(--success);
+
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.deactivateUserButton {
+  color: var(--text-muted);
+
+  border: 1px solid var(--border);
+}
+
+.banUserButton:hover {
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.unbanUserButton:hover {
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.deactivateUserButton:hover {
+  color: var(--text);
+
+  background: var(--surface-hover);
+}
+
 @media (max-width: 700px) {
   .formGrid {
     grid-template-columns: 1fr;
