@@ -1,5 +1,5 @@
 import { mockTf2Key } from "../../../data/mockTf2Key";
-
+import Link from "next/link";
 import styles from "../admin.module.css";
 
 function formatToman(value: number) {
@@ -206,13 +206,12 @@ export default function AdminTf2KeysPage() {
 
                 <td>
                   <div className={styles.tableActions}>
-                    <button
-                      type="button"
-                      className={styles.editButton}
-                      title="فرم ویرایش در مرحله بعد اضافه می‌شود"
+                    <Link
+                        href="/admin/tf2-keys/edit"
+                        className={styles.editButton}
                     >
-                      ویرایش
-                    </button>
+                        ویرایش
+                    </Link>
 
                     <button
                       type="button"
