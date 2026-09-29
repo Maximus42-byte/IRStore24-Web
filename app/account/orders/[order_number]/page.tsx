@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getMockOrderByNumber } from "../../../../data/mockOrders";
-
+import OrderCountdown from "../../../../components/store/OrderCountdown";
 import styles from "./page.module.css";
 
 type PageProps = {
@@ -169,7 +169,13 @@ export default async function OrderDetailPage({
               <h2 className={styles.sectionTitle}>
                 تکمیل خرید
               </h2>
-
+            
+            {order.expiresAt && (
+                <OrderCountdown
+                    expiresAt={order.expiresAt}
+                />
+            )}
+            
               <div className={styles.paymentNotice}>
                 اطلاعات شماره کارت در نسخه نهایی از تنظیمات
                 فروشگاه در FastAPI دریافت خواهد شد. پس از

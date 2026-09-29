@@ -47,8 +47,7 @@ export const mockOrders: MockOrder[] = [
     lockedUsdtTomanRate: 98500,
 
     createdAt: "2026-09-27T19:30:00+03:30",
-    expiresAt: "2026-09-27T21:30:00+03:30",
-
+    expiresAt: "2026-09-29T07:30:00+03:30",
     itemCount: 2,
 
     items: [
