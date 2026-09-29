@@ -544,6 +544,175 @@
   background: var(--surface-hover);
 }
 
+.adminForm {
+  display: grid;
+
+  gap: 18px;
+}
+
+.formSection {
+  padding: 22px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: var(--surface);
+}
+
+.formSectionHeader {
+  margin-bottom: 20px;
+}
+
+.formSectionTitle {
+  margin: 0;
+
+  font-size: 1.05rem;
+}
+
+.formSectionDescription {
+  margin: 6px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 0.72rem;
+  line-height: 1.7;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+
+  gap: 18px;
+}
+
+.formField {
+  display: grid;
+
+  gap: 8px;
+}
+
+.formFieldFull {
+  grid-column: 1 / -1;
+}
+
+.formField label {
+  color: var(--text-muted);
+
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.formField input,
+.formField select,
+.formField textarea {
+  width: 100%;
+
+  padding: 11px 12px;
+
+  color: var(--text);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  outline: none;
+
+  background: rgba(2, 7, 13, 0.45);
+
+  font: inherit;
+
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.formField input,
+.formField select {
+  min-height: 44px;
+}
+
+.formField textarea {
+  resize: vertical;
+
+  line-height: 1.8;
+}
+
+.formField input:focus,
+.formField select:focus,
+.formField textarea:focus {
+  border-color: rgba(
+    245,
+    158,
+    11,
+    0.55
+  );
+
+  background: rgba(2, 7, 13, 0.7);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.secondaryAdminButton {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding-inline: 18px;
+
+  color: var(--text-muted);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  background: var(--surface);
+
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.secondaryAdminButton:hover {
+  color: var(--text);
+
+  background: var(--surface-hover);
+}
+
+.formNotice {
+  margin: 0;
+
+  color: var(--text-muted);
+
+  text-align: left;
+
+  font-size: 0.68rem;
+}
+
+@media (max-width: 700px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formFieldFull {
+    grid-column: auto;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+  }
+
+  .formActions > * {
+    width: 100%;
+  }
+}
+
 @media (max-width: 700px) {
   .adminPageTitleRow {
     align-items: stretch;

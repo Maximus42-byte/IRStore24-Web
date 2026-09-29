@@ -1,5 +1,5 @@
 import { mockCs2Items } from "../../../data/mockCs2Items";
-
+import Link from "next/link";
 import styles from "../admin.module.css";
 
 function formatToman(value: number) {
@@ -38,12 +38,12 @@ export default function AdminCs2ItemsPage() {
             </p>
           </div>
 
-          <button
-            type="button"
+          <Link
+            href="/admin/cs2-items/new"
             className={styles.primaryAdminButton}
-          >
+            >
             + افزودن آیتم
-          </button>
+            </Link>
         </div>
       </header>
 
@@ -258,15 +258,13 @@ export default function AdminCs2ItemsPage() {
                           styles.tableActions
                         }
                       >
-                        <button
-                          type="button"
-                          className={
-                            styles.editButton
-                          }
+                        <Link
+                            href={`/admin/cs2-items/${item.slug}/edit`}
+                            className={styles.editButton}
                         >
-                          ویرایش
-                        </button>
-
+                            ویرایش
+                        </Link>
+                        
                         <button
                           type="button"
                           className={
