@@ -1,5 +1,5 @@
 import { mockOrders, OrderStatus } from "../../../data/mockOrders";
-
+import Link from "next/link";
 import styles from "../admin.module.css";
 
 function formatToman(value: number) {
@@ -291,15 +291,12 @@ export default function AdminOrdersPage() {
                         styles.orderActions
                       }
                     >
-                      <button
-                        type="button"
-                        className={
-                          styles.viewOrderButton
-                        }
-                        title="صفحه جزئیات Admin در مرحله بعد ساخته می‌شود"
-                      >
+                      <Link
+                        href={`/admin/orders/${order.orderNumber}`}
+                        className={styles.viewOrderButton}
+                        >
                         مشاهده
-                      </button>
+                        </Link>
 
                       {order.status ===
                         "pending" && (

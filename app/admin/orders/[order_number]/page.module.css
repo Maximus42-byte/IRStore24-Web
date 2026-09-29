@@ -1,0 +1,376 @@
+.backLink {
+  display: inline-flex;
+
+  margin-bottom: 24px;
+
+  color: var(--text-muted);
+
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.backLink:hover {
+  color: var(--accent);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 22px;
+  padding: 24px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: var(--surface);
+}
+
+.eyebrow {
+  display: inline-flex;
+
+  margin-bottom: 10px;
+  padding: 5px 9px;
+
+  color: var(--accent);
+
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 999px;
+
+  background: rgba(245, 158, 11, 0.08);
+
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.title {
+  margin: 0;
+
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 10px 20px;
+
+  margin-top: 14px;
+
+  color: var(--text-muted);
+
+  font-size: 0.75rem;
+}
+
+.status {
+  flex-shrink: 0;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.pending {
+  color: var(--accent);
+
+  border: 1px solid rgba(245, 158, 11, 0.28);
+
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.confirmed {
+  color: var(--success);
+
+  border: 1px solid rgba(34, 197, 94, 0.25);
+
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.cancelled,
+.expired {
+  color: var(--danger);
+
+  border: 1px solid rgba(239, 68, 68, 0.25);
+
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+
+  gap: 22px;
+
+  align-items: start;
+}
+
+.main {
+  min-width: 0;
+}
+
+.section {
+  margin-bottom: 18px;
+  padding: 22px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: var(--surface);
+}
+
+.sectionTitle {
+  margin: 0 0 18px;
+
+  font-size: 1.05rem;
+}
+
+.items {
+  display: grid;
+
+  gap: 10px;
+}
+
+.item {
+  display: grid;
+  grid-template-columns:
+    58px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 14px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: rgba(2, 7, 13, 0.38);
+}
+
+.itemVisual {
+  width: 58px;
+  height: 58px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--accent);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  background: #07101a;
+
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.itemName {
+  font-weight: 900;
+}
+
+.itemDescription,
+.itemQuantity {
+  margin-top: 5px;
+
+  color: var(--text-muted);
+
+  font-size: 0.7rem;
+}
+
+.itemPrice {
+  text-align: left;
+}
+
+.itemToman {
+  display: block;
+
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.itemUsdt {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--accent);
+
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.adminNotice {
+  padding: 16px;
+
+  color: var(--text-muted);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: rgba(2, 7, 13, 0.38);
+
+  font-size: 0.78rem;
+  line-height: 1.9;
+}
+
+.adminActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+.confirmButton,
+.cancelButton {
+  min-height: 44px;
+
+  border-radius: var(--radius-md);
+
+  background: transparent;
+
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+.confirmButton {
+  color: var(--success);
+
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.cancelButton {
+  color: var(--danger);
+
+  border: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+.confirmButton:hover {
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.cancelButton:hover {
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.summary {
+  position: sticky;
+  top: 96px;
+
+  padding: 22px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: var(--surface);
+}
+
+.summaryTitle {
+  margin: 0 0 20px;
+
+  font-size: 1.05rem;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-top: 12px;
+
+  color: var(--text-muted);
+
+  font-size: 0.75rem;
+}
+
+.summaryRow strong {
+  color: var(--text);
+}
+
+.divider {
+  height: 1px;
+
+  margin-block: 20px;
+
+  background: var(--border);
+}
+
+.totalLabel {
+  color: var(--text-muted);
+
+  font-size: 0.72rem;
+}
+
+.totalToman {
+  margin-top: 6px;
+
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.totalUsdt {
+  margin-top: 4px;
+
+  color: var(--accent);
+
+  font-weight: 900;
+}
+
+.rate,
+.expires {
+  margin-top: 18px;
+  padding-top: 16px;
+
+  color: var(--text-muted);
+
+  border-top: 1px solid var(--border);
+
+  font-size: 0.72rem;
+  line-height: 1.8;
+}
+
+.expires strong {
+  color: var(--text);
+}
+
+@media (max-width: 950px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summary {
+    position: static;
+  }
+}
+
+@media (max-width: 620px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .item {
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+
+  .itemPrice {
+    grid-column: 1 / -1;
+
+    text-align: right;
+  }
+
+  .adminActions {
+    grid-template-columns: 1fr;
+  }
+}
