@@ -4,8 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.account import router as account_router
+from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.health import router as health_router
+from app.api.store import router as store_router
 from app.core.config import settings
 
 
@@ -31,6 +33,7 @@ async def sanitized_validation_error(request: Request, error: RequestValidationE
     for item in error.errors():
         detail = dict(item)
         detail.pop("input", None)
+        detail.pop("ctx", None)
         details.append(detail)
     return JSONResponse(status_code=422, content={"detail": details})
 
@@ -49,3 +52,5 @@ async def require_trusted_origin(request: Request, call_next):
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(account_router)
+app.include_router(store_router)
+app.include_router(admin_router)
