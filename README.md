@@ -16,7 +16,7 @@ Next.js storefront and FastAPI backend for CS2 items and TF2 keys. See [docs/ARC
 
 5. In another terminal at the repository root, run `npm install` and `npm run dev`. Open `http://localhost:3000`.
 
-The Next.js development server forwards `/api/*` to `http://127.0.0.1:8000`. Set `API_PROXY_TARGET` only if FastAPI uses another local address. Browser requests remain same origin, so the HttpOnly session cookie stays with the browser and FastAPI receives the browser's Origin header. In production, Nginx routes `/api/*` to FastAPI and `/media/*` to persistent media storage; Next.js does not add a production API rewrite.
+The Next.js development server forwards `/api/*` to `http://127.0.0.1:8000`. Set `API_PROXY_TARGET` only if FastAPI uses another local address. Browser requests remain same origin, so the HttpOnly session cookie stays with the browser and FastAPI receives the browser's Origin header. Production requires Nginx to route `/api/*` to FastAPI and `/media/*` to persistent media storage; Next.js does not add a production API rewrite. The tracked Nginx and Compose files do not yet provide that production routing. See [local end-to-end validation](docs/E2E_VALIDATION.md).
 
 Product image paths are `/media/*`. To preview images locally, make the corresponding files available under `public/media/` or use a local media server at that path. The UI falls back to the weapon label if an image is absent or fails to load.
 
