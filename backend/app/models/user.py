@@ -108,6 +108,12 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    cart: Mapped["Cart | None"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    orders: Mapped[list["Order"]] = relationship(
+        back_populates="user", foreign_keys="Order.user_id"
+    )
 
 
 class UserSession(Base):

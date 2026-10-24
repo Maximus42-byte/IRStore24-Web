@@ -12,7 +12,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
@@ -78,6 +78,13 @@ class CS2Item(Base):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+    cart_items: Mapped[list["CartCS2Item"]] = relationship(
+        back_populates="cs2_item"
+    )
+    order_items: Mapped[list["OrderCS2Item"]] = relationship(
+        back_populates="cs2_item"
     )
 
     @property

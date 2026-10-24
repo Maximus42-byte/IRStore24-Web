@@ -11,7 +11,7 @@ from sqlalchemy import (
     String,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
@@ -58,4 +58,11 @@ class TF2Key(Base):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+    cart_items: Mapped[list["CartTF2Key"]] = relationship(
+        back_populates="tf2_key"
+    )
+    order_items: Mapped[list["OrderTF2Key"]] = relationship(
+        back_populates="tf2_key"
     )
