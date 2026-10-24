@@ -1,6 +1,16 @@
+"use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { api, type User } from "../../lib/api";
 
 export default function SiteHeader() {
+  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => { api<User>("/api/auth/me").then(found => { if (active) setUser(found); }).catch(() => { if (active) setUser(null); }); };
+    refresh(); window.addEventListener("auth:changed", refresh);
+    return () => { active = false; window.removeEventListener("auth:changed", refresh); };
+  }, []);
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -27,9 +37,10 @@ export default function SiteHeader() {
         </nav>
 
         <div className="site-header__actions">
-          <Link href="/login" className="header-action">
-            ورود
+          <Link href={user ? "/account" : "/login"} className="header-action">
+            {user ? "حساب من" : "ورود"}
           </Link>
+          {user?.role === "admin" && <Link href="/admin" className="header-action">مدیریت</Link>}
 
           <Link
             href="/cart"

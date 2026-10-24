@@ -1,150 +1,19 @@
+"use client";
 import Link from "next/link";
-
-import { mockOrders } from "../../data/mockOrders";
-
+import { useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
+import { api, dateText, errorMessage, money, type Order, type Page, type User } from "../../lib/api";
+import { useSession } from "../../lib/session";
 import styles from "./page.module.css";
-
-function formatToman(value: number) {
-  return new Intl.NumberFormat("en-US").format(value);
-}
-
-function formatUsdt(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function getStatusLabel(status: string) {
-  switch (status) {
-    case "pending":
-      return "در انتظار تأیید";
-
-    case "confirmed":
-      return "تأیید شده";
-
-    case "cancelled":
-      return "لغو شده";
-
-    case "expired":
-      return "منقضی شده";
-
-    default:
-      return status;
-  }
-}
-
 export default function AccountPage() {
-  return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <span className={styles.eyebrow}>
-          My Account
-        </span>
-
-        <h1 className={styles.title}>
-          حساب کاربری
-        </h1>
-
-        <p className={styles.description}>
-          اطلاعات حساب و آخرین سفارش‌های خود را از این بخش
-          مشاهده و مدیریت کنید.
-        </p>
-      </header>
-
-      <div className={styles.layout}>
-        <aside className={styles.profile}>
-          <div className={styles.avatar}>
-            U
-          </div>
-
-          <h2 className={styles.profileTitle}>
-            حساب کاربری
-          </h2>
-
-          <p className={styles.email}>
-            user@example.com
-          </p>
-
-          <span className={styles.status}>
-            Active
-          </span>
-
-          <div className={styles.profileActions}>
-            <Link
-              href="/account/orders"
-              className={styles.profileLink}
-            >
-              همه سفارش‌ها
-            </Link>
-
-            <button
-              type="button"
-              className={styles.logoutButton}
-            >
-              خروج از حساب
-            </button>
-          </div>
-        </aside>
-
-        <section className={styles.content}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>
-              آخرین سفارش‌ها
-            </h2>
-
-            <Link
-              href="/account/orders"
-              className={styles.viewAll}
-            >
-              مشاهده همه
-            </Link>
-          </div>
-
-          <div className={styles.orders}>
-            {mockOrders.map((order) => (
-              <Link
-                key={order.id}
-                href={`/account/orders/${order.orderNumber}`}
-                className={styles.order}
-              >
-                <div>
-                  <div className={styles.orderNumber}>
-                    سفارش {order.orderNumber}
-                  </div>
-
-                  <div className={styles.orderMeta}>
-                    {order.itemCount} کالا
-                  </div>
-                </div>
-
-                <div className={styles.orderRight}>
-                  <span
-                    className={`${styles.statusBadge} ${
-                      styles[order.status]
-                    }`}
-                  >
-                    {getStatusLabel(order.status)}
-                  </span>
-
-                  <span className={styles.orderPrice}>
-                    {formatToman(
-                      order.totalPriceToman,
-                    )}{" "}
-                    تومان
-                  </span>
-
-                  <span className={styles.orderUsdt}>
-                    {formatUsdt(
-                      order.totalPriceUsdt,
-                    )}{" "}
-                    USDT
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
+  const { user, loading, error: sessionError } = useSession(); const [orders, setOrders] = useState<Order[]>([]); const [error, setError] = useState(""); const [current, setCurrent] = useState(""); const [next, setNext] = useState(""); const [busy, setBusy] = useState(false); const router = useRouter();
+  useEffect(() => { if (user) Promise.all([api<User>("/api/account"), api<Page<Order>>("/api/account/orders?page_size=5")]).then(([, data]) => setOrders(data.items)).catch(e => setError(errorMessage(e))); }, [user]);
+  async function logout() { setBusy(true); try { await api<void>("/api/auth/logout", { method: "POST" }); window.dispatchEvent(new Event("auth:changed")); router.replace("/login"); router.refresh(); } catch (e) { setError(errorMessage(e)); } finally { setBusy(false); } }
+  async function changePassword(event: FormEvent) { event.preventDefault(); setBusy(true); setError(""); try { await api<void>("/api/account/change-password", { method: "POST", body: { current_password: current, new_password: next } }); window.dispatchEvent(new Event("auth:changed")); router.replace("/login"); } catch (e) { setError(errorMessage(e)); } finally { setBusy(false); } }
+  if (loading || !user) return <div className={styles.page}>{sessionError || "در حال بارگذاری…"}</div>;
+  return <div className={styles.page}><header className={styles.header}><span className={styles.eyebrow}>My Account</span><h1 className={styles.title}>حساب کاربری</h1><p className={styles.description}>اطلاعات حساب و آخرین سفارش‌ها</p></header>{error && <p role="alert">{error}</p>}
+    <div className={styles.layout}><aside className={styles.profile}><div className={styles.avatar}>{user.email[0].toUpperCase()}</div><h2 className={styles.profileTitle}>حساب کاربری</h2><p className={styles.email}>{user.email}</p><span className={styles.status}>{user.is_active ? "Active" : "Inactive"}</span><div className={styles.profileActions}><Link href="/account/orders" className={styles.profileLink}>همه سفارش‌ها</Link><button className={styles.logoutButton} type="button" onClick={logout} disabled={busy}>خروج از حساب</button></div></aside>
+      <section className={styles.content}><div className={styles.sectionHeader}><h2 className={styles.sectionTitle}>آخرین سفارش‌ها</h2><Link href="/account/orders" className={styles.viewAll}>مشاهده همه</Link></div><div className={styles.orders}>{orders.length ? orders.map(order => <Link key={order.order_number} href={`/account/orders/${order.order_number}`} className={styles.order}><div><div className={styles.orderNumber}>سفارش {order.order_number}</div><div className={styles.orderMeta}>{dateText(order.created_at)}</div></div><div className={styles.orderRight}><span className={`${styles.statusBadge} ${styles[order.status]}`}>{order.status}</span><span className={styles.orderPrice}>{money(order.total_price_toman)} تومان</span><span className={styles.orderUsdt}>{money(order.total_price_usdt)} USDT</span></div></Link>) : <p>هنوز سفارشی ثبت نشده است.</p>}</div>
+        <h2 className={styles.sectionTitle}>تغییر رمز عبور</h2><form onSubmit={changePassword} style={{display:"grid",gap:12,maxWidth:420}}><label>رمز فعلی<input type="password" required value={current} onChange={e => setCurrent(e.target.value)} /></label><label>رمز جدید<input type="password" required minLength={12} value={next} onChange={e => setNext(e.target.value)} /></label><button type="submit" disabled={busy}>تغییر رمز عبور</button></form>
+      </section></div></div>;
 }

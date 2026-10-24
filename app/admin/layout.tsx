@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { useSession } from "../../lib/session";
 
 import styles from "./admin.module.css";
 
@@ -7,6 +9,8 @@ export default function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user, loading, error } = useSession(true);
+  if (loading || !user || user.role !== "admin") return <main className={styles.adminShell}>{error || "در حال بررسی دسترسی مدیریت…"}</main>;
   return (
     <div className={styles.adminShell}>
       <aside className={styles.sidebar}>
