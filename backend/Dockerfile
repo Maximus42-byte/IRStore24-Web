@@ -1,6 +1,8 @@
 FROM public.ecr.aws/docker/library/python:3.12-slim-bookworm AS build
 
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=90 \
+    PIP_RETRIES=5
 WORKDIR /build
 COPY backend/ /build/backend/
 RUN python -m venv /opt/venv \
