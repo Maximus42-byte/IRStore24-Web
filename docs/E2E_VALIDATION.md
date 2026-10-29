@@ -84,7 +84,7 @@ After the evidence was recorded, both task-created disposable databases,
 private credential files, and Chrome profiles were removed. The normal
 development database and its volumes were left in place.
 
-## Deployment blocker
+## Deployment blocker observed during this run
 
 The production Next.js build intentionally has no `/api/*` rewrite.
 Directly serving that build returned HTTP 404 for `/api/auth/me`. The
@@ -92,10 +92,11 @@ tracked `nginx-irstore24.conf` forwards all paths to Next.js and has no
 `/api/*` or `/media/*` route, while the tracked Compose file starts only
 the web and database services. The local browser suite passed through the
 development proxy; it does not prove production API routing. The actual VPS
-configuration was not inspected or changed.
+configuration was not inspected or changed. A later local preparation change added
+Compose, Nginx, media, and timer templates in [deployment preparation](DEPLOYMENT.md);
+those templates have not been deployed or reverse-proxy tested.
 
-Before staging or production launch, provide and verify a backend service,
-same-origin `/api/*` routing, persistent `/media/*` delivery, HTTPS Secure
-cookies, real administrator-approved store settings, and a monitored
-expiration scheduler. `docs/ORDER_EXPIRATION.md` describes the scheduler
-command; this repository does not configure a production schedule.
+Before staging or production launch, build and verify the prepared backend
+service, same-origin `/api/*` routing, persistent `/media/*` delivery, HTTPS Secure
+cookies, real administrator-approved store settings, and the proposed monitored
+expiration timer. The deployment guide records the remaining local and VPS gates.

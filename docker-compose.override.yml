@@ -1,0 +1,6 @@
+# Docker Compose loads this file automatically for local development.
+# Production commands must explicitly select docker-compose.yml alone.
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"

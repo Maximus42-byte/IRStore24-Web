@@ -4,3 +4,14 @@ node_modules
 .gitignore
 README.md
 npm-debug.log
+.env*
+**/.env*
+backend/.venv
+backend/build
+backend/.pytest_cache
+backend/*.egg-info
+**/__pycache__
+**/*.pyc
+docs
+tests
+backend/tests

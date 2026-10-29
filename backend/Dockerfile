@@ -1,0 +1,24 @@
+FROM python:3.12-slim-bookworm AS build
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /build
+COPY backend/ /build/backend/
+RUN python -m venv /opt/venv \
+    && /opt/venv/bin/python -m pip install --no-cache-dir --constraint /build/backend/constraints-container.txt /build/backend
+
+FROM python:3.12-slim-bookworm AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN groupadd --system app && useradd --system --gid app --home-dir /nonexistent --shell /usr/sbin/nologin app
+COPY --from=build /opt/venv /opt/venv
+WORKDIR /app/backend
+COPY --chown=app:app backend/alembic.ini ./alembic.ini
+COPY --chown=app:app backend/alembic ./alembic
+
+USER app
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD /opt/venv/bin/python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/database', timeout=3).close()"
+CMD ["/opt/venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

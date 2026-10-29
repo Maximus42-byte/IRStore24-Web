@@ -1,0 +1,11 @@
+[Unit]
+Description=Run IRStore24 order expiration every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+Persistent=true
+AccuracySec=10s
+Unit=irstore24-expire-orders.service
+
+[Install]
+WantedBy=timers.target

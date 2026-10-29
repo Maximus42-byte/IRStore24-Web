@@ -1,0 +1,11 @@
+# Review paths and Docker access on the actual VPS before installing.
+[Unit]
+Description=Expire due IRStore24 orders
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/irstore24
+ExecStart=/usr/bin/docker compose --env-file /etc/irstore24/production.env -f /opt/irstore24/docker-compose.yml exec -T api /opt/venv/bin/python -m app.jobs.expire_orders --batch-size 100
+TimeoutStartSec=5min

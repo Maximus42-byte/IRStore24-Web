@@ -34,7 +34,7 @@ The [architecture document](docs/ARCHITECTURE.md) is the source of truth for the
 | --- | --- |
 | Application | Next.js storefront and FastAPI backend implement the MVP flows described below. |
 | Local validation | Authenticated browser journeys, purchases, inventory transitions, administration, the production build, TypeScript, frontend and backend tests, and Alembic drift checks passed in an isolated local environment. See [E2E validation](docs/E2E_VALIDATION.md). |
-| Deployment | Production readiness is **not confirmed**. The last documented live site is an Under Construction deployment; the current VPS state was not verified during local validation. The tracked deployment files do not yet route production API and media requests or start a FastAPI service. |
+| Deployment | Production readiness is **not confirmed**. Operator-reported VPS facts from 2026-10-29 confirm the Under Construction site still serves HTTPS through `irstore24-web` at `127.0.0.1:3000`; no production PostgreSQL volume exists. The new container stack and API/media routing remain untested on that host. |
 
 Local success does not establish that payments, HTTPS sessions, media delivery, or order expiration are working in Production.
 
@@ -57,7 +57,7 @@ Local success does not establish that payments, HTTPS sessions, media delivery, 
 | ORM | SQLAlchemy 2 | Models and transactional database access |
 | Migrations | Alembic | Versioned schema changes |
 | Reverse proxy | Nginx (target architecture) | Same-origin routing and HTTPS termination |
-| Containerization | Docker, Docker Compose | Tracked web and database services; API service remains deployment work |
+| Containerization | Docker, Docker Compose | Tracked web, API, and database services; container builds remain unverified |
 | Deployment OS | Ubuntu Server (target) | Intended production host |
 
 ## System architecture
@@ -74,7 +74,7 @@ Nginx
     `-- /media/*  --> persistent media storage
 ```
 
-The API, database, and application ports should remain private behind the reverse proxy. This is the [target architecture](docs/ARCHITECTURE.md), **not the current tracked deployment configuration**: the tracked Nginx file forwards all paths to Next.js, Compose defines only `web` and `db`, and production Next.js has no `/api/*` rewrite. Local development uses the Next.js development proxy instead.
+The API, database, and application ports should remain private behind the reverse proxy. This is the [target architecture](docs/ARCHITECTURE.md). Compose and a host-Nginx location template now describe this routing, but no container or live HTTPS proxy test has been completed. Production Next.js still has no `/api/*` rewrite; local development uses its development proxy.
 
 ## Repository structure
 
@@ -289,7 +289,7 @@ After signing in as the administrator, configure a real, approved USDT/Toman rat
 
 CS2 rows store an `image_path` reference such as `/media/cs2/item.webp`. The frontend renders the referenced image and falls back to the weapon label if the path is missing or loading fails. There is no image-upload API in the current MVP.
 
-For a local preview, a file can be placed under `public/media/` at the matching path. Production needs persistent storage served on `/media/*` by the reverse proxy; files inside a disposable web container layer are not a durable media strategy. That route is not present in the tracked Nginx configuration.
+For a local preview, a file can be placed under `public/media/` at the matching path. The [deployment guide](docs/DEPLOYMENT.md) plans persistent host storage at `/srv/irstore24/media` served by a host-Nginx location template. The path and permissions require verification on the VPS; files inside a disposable web container layer are not durable media.
 
 ## Order lifecycle
 
@@ -312,7 +312,7 @@ The expiration worker is implemented in `backend/app/jobs/expire_orders.py`. Fro
 .venv/bin/python -m app.jobs.expire_orders --batch-size 100
 ```
 
-It handles due pending orders transactionally. [Order expiration operations](docs/ORDER_EXPIRATION.md) describes the worker and scheduling expectations. **No production scheduler is configured in this repository**; deploying and monitoring one remains launch work.
+It handles due pending orders transactionally. [Order expiration operations](docs/ORDER_EXPIRATION.md) describes the worker and scheduling expectations. A host systemd service and timer template now exists under `deploy/systemd/`. It is not installed or running anywhere by this change; deploying and monitoring one remains launch work.
 
 ## Testing and quality checks
 
@@ -331,11 +331,11 @@ ESLint is **not configured**. TypeScript checking and the production build do no
 
 ## Deployment status
 
-The last documented production site is an Under Construction deployment, subject to verification on the actual VPS. The integrated storefront has been validated locally, but it is not declared production-ready.
+The operator reported on 2026-10-29 that the Under Construction site still returns HTTPS 200 from `/opt/irstore24` on `main` commit `43b0230`. The integrated storefront has been validated locally, but it is not declared production-ready. This repository task did not access the VPS.
 
-The tracked deployment files still need a FastAPI Docker service, Compose wiring between `web`, `api`, and `db`, Nginx `/api/*` routing, persistent `/media/*` routing and storage, and a monitored order-expiration schedule. The tracked Nginx file currently proxies all requests to Next.js, and the production Next.js build has no API rewrite; direct `/api/auth/me` returned 404 during local production-build validation. The live server may differ and was not inspected.
+Local deployment preparation now includes a FastAPI Dockerfile, Compose services for `web`, `api`, and `db`, a host-Nginx location template for `/api/*` and `/media/*`, and a systemd expiration-timer template. These have not been deployed or container-tested. An isolated [staging configuration](docs/STAGING.md) now selects a separate Compose project, ports 3100/8100, and its own PostgreSQL volume while leaving the existing web container and Nginx unchanged. The production Next.js build still has no API rewrite; direct `/api/auth/me` returned 404 in the earlier local validation without Nginx.
 
-Before deployment, prepare production-only environment values, HTTPS and Secure cookies, reviewed migrations, a controlled administrator bootstrap, approved store settings, production route and purchase verification, and a rollback plan. Do not assume the current `docker-compose.yml` or `nginx-irstore24.conf` already provides the [target production architecture](docs/ARCHITECTURE.md).
+Before deployment, follow the [deployment guide](docs/DEPLOYMENT.md): inspect the real VPS and data volume, prepare private production environment values, verify HTTPS and Secure cookies, review migrations and backups, initialize the store through an approved administrator, run production route and purchase checks, install monitoring, and plan rollback. The Nginx file is a location fragment to merge into the inspected live TLS server, not a replacement virtual host.
 
 ## Security notes
 
@@ -366,9 +366,11 @@ Before deployment, prepare production-only environment values, HTTPS and Secure 
 - [Local browser E2E validation and deployment gap](docs/E2E_VALIDATION.md)
 - [Controlled administrator bootstrap](docs/ADMIN_BOOTSTRAP.md)
 - [Pending-order expiration operations](docs/ORDER_EXPIRATION.md)
+- [Deployment preparation and future VPS checklist](docs/DEPLOYMENT.md)
+- [Isolated staging procedure](docs/STAGING.md)
 
 ## Roadmap
 
-**MVP launch work:** finish and verify FastAPI deployment, same-origin production API routing, persistent media delivery, expiration scheduling, secure production configuration, approved store initialization, and an end-to-end staging and production rollout with rollback.
+**MVP launch work:** build and test the images in the isolated staging project, verify VPS Compose and Nginx details, secure production environment and storage, install and monitor expiration scheduling, initialize approved store data, and conduct a controlled production rollout with rollback.
 
 **Optional later work:** Steam API or automated trade integration and an automated payment gateway are outside MVP v1. They should be designed separately rather than assumed to exist today.

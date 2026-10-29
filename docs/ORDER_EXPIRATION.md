@@ -9,8 +9,9 @@ transactionally:
 ```
 
 Run it from the `backend` directory with the same environment as the API.
-A deployment scheduler can invoke it every minute. This repository does not
-configure a Production scheduler; that remains a separate deployment step.
+A deployment scheduler can invoke it every minute. A reviewed host systemd
+service and timer template is in `deploy/systemd/` (see [deployment preparation](DEPLOYMENT.md)).
+It is not installed or running in Production by this repository change.
 
 The command selects due pending orders with PostgreSQL row locks and
 `SKIP LOCKED`, then commits each expiration and stock restoration together.

@@ -5,8 +5,10 @@ out/
 
 .env
 .env.local
+.env.*
 
 backend/.venv/
+backend/build/
 __pycache__/
 *.py[cod]
 .pytest_cache/
