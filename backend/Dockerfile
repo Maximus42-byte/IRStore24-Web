@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm AS build
+FROM public.ecr.aws/docker/library/python:3.12-slim-bookworm AS build
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /build
@@ -6,7 +6,7 @@ COPY backend/ /build/backend/
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/python -m pip install --no-cache-dir --constraint /build/backend/constraints-container.txt /build/backend
 
-FROM python:3.12-slim-bookworm AS runtime
+FROM public.ecr.aws/docker/library/python:3.12-slim-bookworm AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
