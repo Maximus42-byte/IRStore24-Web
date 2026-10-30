@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -10,6 +11,14 @@ Exterior = Literal[
     "Factory New", "Minimal Wear", "Field-Tested", "Well-Worn", "Battle-Scarred"
 ]
 Money = Decimal
+
+MEDIA_PATH_PATTERN = re.compile(r"/media/(?:[a-z0-9_-]+/)*[a-z0-9_-]+\.(?:png|jpe?g|webp|gif|avif)", re.IGNORECASE | re.ASCII)
+
+
+def validate_media_path(value: str | None) -> str | None:
+    if value is not None and MEDIA_PATH_PATTERN.fullmatch(value) is None:
+        raise ValueError("image_path must match a safe /media/ image path")
+    return value
 
 
 class ExactDecimalInput(BaseModel):
@@ -49,6 +58,7 @@ class CS2Public(BaseModel):
 class TF2Public(BaseModel):
     id: int
     stock_quantity: int
+    image_path: str | None
     available: bool
     sell_price: PriceView
     buy_price: PriceView
@@ -96,18 +106,7 @@ class CS2Write(ExactDecimalInput):
     @field_validator("image_path")
     @classmethod
     def safe_image_path(cls, value: str | None) -> str | None:
-        if value is None:
-            return None
-        parts = value.split("/")
-        if (
-            not value.startswith("/media/")
-            or len(parts) < 3
-            or any(part in ("", ".", "..") for part in parts[2:])
-            or any(char in value for char in ("\\", "?", "#", "%", ":"))
-            or any(not all(c.isalnum() or c in "-_." for c in part) for part in parts[2:])
-        ):
-            raise ValueError("image_path must be a safe /media/ relative path")
-        return value
+        return validate_media_path(value)
 
 
 class CS2Patch(CS2Write):
@@ -147,7 +146,13 @@ class TF2Write(ExactDecimalInput):
     sell_price_currency: Currency
     buy_price_amount: Money = Field(gt=0, max_digits=20, decimal_places=8)
     buy_price_currency: Currency
+    image_path: str | None = Field(default=None, max_length=1024)
     is_active: bool = True
+
+    @field_validator("image_path")
+    @classmethod
+    def safe_image_path(cls, value: str | None) -> str | None:
+        return validate_media_path(value)
 
 
 class TF2Patch(TF2Write):
@@ -161,7 +166,7 @@ class TF2Patch(TF2Write):
     @model_validator(mode="after")
     def reject_null_required_fields(self):
         for field in self.model_fields_set:
-            if getattr(self, field) is None:
+            if field != "image_path" and getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null")
         return self
 

@@ -100,3 +100,9 @@ Before staging or production launch, build and verify the prepared backend
 service, same-origin `/api/*` routing, persistent `/media/*` delivery, HTTPS Secure
 cookies, real administrator-approved store settings, and the proposed monitored
 expiration timer. The deployment guide records the remaining local and VPS gates.
+
+## Image-management and payment browser check (2026-10-30)
+
+The browser harness now accepts a private `origin` on another localhost port and optional `api_port` (default 8000), allowing a disposable run without stopping other local services. With an isolated database and media root, the `seed` phase selects PNG files in both admin forms, checks the pre-save blob preview, uploads them, and verifies their CS2/TF2 `/media/...` responses. The new `payment-unconfigured` phase temporarily removes payment fields only in that disposable database, checks the Persian cart notice and disabled purchase button, confirms the API still rejects finalization, then restores those test settings and removes the cart line.
+
+The 2026-10-30 local run passed `prepare`, `register`, `promote`, `seed`, and `payment-unconfigured` on alternate loopback ports 3001/8001. The generated test database, credentials file, media, browser profiles, and local test services were removed. This run did not execute the remaining purchase, admin, account, and availability phases or validate production HTTPS/Nginx behavior.

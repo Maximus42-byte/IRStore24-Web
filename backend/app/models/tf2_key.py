@@ -47,6 +47,7 @@ class TF2Key(Base):
         Numeric(20, 8), nullable=False
     )
     buy_price_currency: Mapped[str] = mapped_column(String(5), nullable=False)
+    image_path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="true"
     )

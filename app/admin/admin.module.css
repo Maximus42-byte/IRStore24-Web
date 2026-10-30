@@ -1214,3 +1214,41 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.imagePreview {
+  width: 180px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(2, 7, 13, 0.45);
+  color: var(--text-muted);
+}
+
+.imagePreview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.imageControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.imageControls button {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.imageHelp {
+  color: var(--text-muted);
+}

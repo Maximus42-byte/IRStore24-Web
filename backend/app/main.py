@@ -8,6 +8,7 @@ from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.cart import router as cart_router
 from app.api.health import router as health_router
+from app.api.media import media_router, upload_router
 from app.api.orders import (
     account_router as account_orders_router,
     admin_router as admin_orders_router,
@@ -60,6 +61,8 @@ app.include_router(auth_router)
 app.include_router(account_router)
 app.include_router(store_router)
 app.include_router(admin_router)
+app.include_router(upload_router)
+app.include_router(media_router)
 app.include_router(cart_router)
 app.include_router(purchase_router)
 app.include_router(account_orders_router)

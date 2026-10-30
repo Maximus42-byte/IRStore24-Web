@@ -8,6 +8,8 @@ out/
 .env.*
 
 backend/.venv/
+backend/media/
+backend/container-media/
 backend/build/
 __pycache__/
 *.py[cod]

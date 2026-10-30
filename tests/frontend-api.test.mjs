@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { api, ApiError, money, priceText, query } from "../lib/api.ts";
+import { api, ApiError, money, priceText, query, uploadProductImage, checkoutErrorMessage, safeMediaPath } from "../lib/api.ts";
 import { safeExternalUrl } from "../lib/social.ts";
 
 test("monetary formatting preserves decimal strings", () => {
@@ -41,4 +41,47 @@ test("API client reports network failure without exposing implementation errors"
   } finally {
     globalThis.fetch = original;
   }
+});
+
+
+test("image upload UI client sends raw file with session credentials and rejects unsafe responses", async () => {
+  const original = globalThis.fetch;
+  const file = new File([new Uint8Array([137, 80, 78, 71])], "sample.png", { type: "image/png" });
+  try {
+    globalThis.fetch = async (path, options) => {
+      assert.equal(path, "/api/admin/media/tf2");
+      assert.equal(options.method, "POST");
+      assert.equal(options.credentials, "same-origin");
+      assert.equal(options.body, file);
+      assert.equal(options.headers["Content-Type"], "image/png");
+      return Response.json({ path: "/media/tf2/0123456789abcdef0123456789abcdef.webp" }, { status: 201 });
+    };
+    assert.equal(await uploadProductImage("tf2", file), "/media/tf2/0123456789abcdef0123456789abcdef.webp");
+    globalThis.fetch = async () => Response.json({ detail: "Administrator access required" }, { status: 403 });
+    await assert.rejects(uploadProductImage("tf2", file),
+      error => error instanceof ApiError && error.status === 403);
+    globalThis.fetch = async () => Response.json({ path: "https://evil.example/file.webp" }, { status: 201 });
+    await assert.rejects(uploadProductImage("tf2", file),
+      error => error instanceof ApiError && error.status === 502);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("cart distinguishes missing payment setup from other checkout failures in Persian", () => {
+  const missing = checkoutErrorMessage(new ApiError(503, "Payment instructions are not configured"));
+  assert.match(missing, /اطلاعات پرداخت فروشگاه/);
+  assert.doesNotMatch(missing, /Payment instructions/);
+  assert.match(checkoutErrorMessage(new ApiError(503, "Exchange rate is not configured")), /نرخ تبدیل/);
+  assert.match(checkoutErrorMessage(new ApiError(409, "A CS2 item is unavailable")), /موجودی/);
+  assert.equal(checkoutErrorMessage(new ApiError(500, "Internal Server Error")), "ثبت سفارش انجام نشد. لطفاً دوباره تلاش کنید.");
+});
+
+test("product images render only safe local media paths", () => {
+  assert.equal(safeMediaPath("/media/cs2/example.webp"), true);
+  assert.equal(safeMediaPath("/media/legacy.webp"), true);
+  assert.equal(safeMediaPath("/media/tf2/example.png"), true);
+  assert.equal(safeMediaPath("https://evil.example/track.png"), false);
+  assert.equal(safeMediaPath("/media/../secret.webp"), false);
+  assert.equal(safeMediaPath("/media/tf2/example.svg"), false);
 });

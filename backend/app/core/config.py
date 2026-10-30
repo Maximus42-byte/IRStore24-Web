@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     db_host: str = "127.0.0.1"
     db_port: int = 5432
+    media_root: Path = PROJECT_ROOT / "backend" / "media"
 
     app_env: Literal["development", "production"] = "production"
     auth_cookie_secure: bool = True
@@ -34,6 +35,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_auth_configuration(self) -> "Settings":
+        if not self.media_root.is_absolute():
+            raise ValueError("MEDIA_ROOT must be an absolute path")
         if not self.auth_allowed_origins:
             raise ValueError("At least one authentication origin is required")
         for origin in self.auth_allowed_origins:

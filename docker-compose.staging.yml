@@ -10,6 +10,12 @@ services:
   api:
     ports: !override
       - "127.0.0.1:8100:8000"
+    volumes: !override
+      - type: bind
+        source: /srv/irstore24-staging/media
+        target: /app/media
+        bind:
+          create_host_path: false
 
   db:
     ports: !override []

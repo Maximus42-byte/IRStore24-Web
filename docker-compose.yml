@@ -26,6 +26,12 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    volumes:
+      - type: bind
+        source: /srv/irstore24/media
+        target: /app/media
+        bind:
+          create_host_path: false
     ports:
       - "127.0.0.1:8000:8000"
     environment:
@@ -34,6 +40,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the selected environment file}
       DB_HOST: db
       DB_PORT: "5432"
+      MEDIA_ROOT: /app/media
       APP_ENV: production
       AUTH_COOKIE_SECURE: "true"
       AUTH_ALLOWED_ORIGINS: '["https://irstore24.ir","https://www.irstore24.ir"]'

@@ -5,7 +5,10 @@ const nextConfig: NextConfig = {
   agentRules: false,
   async rewrites() {
     return process.env.NODE_ENV === "development"
-      ? [{ source: "/api/:path*", destination: `${process.env.API_PROXY_TARGET || "http://127.0.0.1:8000"}/api/:path*` }]
+      ? [
+          { source: "/api/:path*", destination: `${process.env.API_PROXY_TARGET || "http://127.0.0.1:8000"}/api/:path*` },
+          { source: "/media/:path*", destination: `${process.env.API_PROXY_TARGET || "http://127.0.0.1:8000"}/media/:path*` },
+        ]
       : [];
   },
 };

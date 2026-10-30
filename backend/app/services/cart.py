@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.store import current_rate
+from app.models.store_settings import StoreSettings
 from app.models.cart import Cart, CartCS2Item, CartTF2Key
 from app.models.cs2_item import CS2Item
 from app.models.tf2_key import TF2Key
@@ -12,6 +12,7 @@ from app.models.user import User
 from app.schemas.orders import CartView, CS2CartLine, TF2CartLine
 from app.services.auth import utc_now
 from app.services.pricing import cs2_view, tf2_view
+from app.services.settings import payment_instructions_configured
 
 
 MAX_CART_QUANTITY = 1_000_000
@@ -91,7 +92,8 @@ def remove_cart_line(
 
 
 def cart_view(db: Session, cart: Cart) -> CartView:
-    rate = current_rate(db)
+    settings = db.get(StoreSettings, 1)
+    rate = settings.usdt_toman_rate if settings is not None else None
     cs2_lines = []
     tf2_lines = []
     toman_total = Decimal(0)
@@ -131,4 +133,5 @@ def cart_view(db: Session, cart: Cart) -> CartView:
         total_price_toman=toman_total if rate is not None else None,
         total_price_usdt=usdt_total if rate is not None else None,
         exchange_rate_configured=rate is not None,
+        payment_instructions_configured=payment_instructions_configured(settings),
     )

@@ -62,6 +62,7 @@ def cs2_view(item: CS2Item, rate: Decimal | None, *, admin: bool = False):
 def tf2_view(item: TF2Key, rate: Decimal | None, *, admin: bool = False):
     data = {
         "id": item.id, "stock_quantity": item.stock_quantity,
+        "image_path": item.image_path,
         "available": item.is_active and item.stock_quantity > 0,
         "sell_price": price_view(item.sell_price_amount, item.sell_price_currency, rate),
         "buy_price": price_view(item.buy_price_amount, item.buy_price_currency, rate),

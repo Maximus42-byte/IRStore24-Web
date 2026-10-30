@@ -9,7 +9,8 @@ const configPath = process.env.E2E_CONFIG_PATH;
 assert(configPath, "E2E_CONFIG_PATH is required");
 const config = JSON.parse(readFileSync(configPath, "utf8"));
 assert(/^irstore24_e2e_[a-f0-9]+$/.test(config.database));
-assert.equal(config.origin, "http://localhost:3000");
+assert(/^http:\/\/localhost:\d+$/.test(config.origin));
+config.api_port ??= 8000;
 config.user = { email: config.user_email, password: config.user_password };
 config.admin = { email: config.admin_email, password: config.admin_password };
 const phase = process.argv[2];
@@ -145,6 +146,22 @@ async function clickArticleButton(tab, href, label) {
   const result = await tab.eval(`(() => { const article = document.querySelector(${JSON.stringify(selector)}); const button = [...(article?.querySelectorAll('button') || [])].find(el => el.textContent.trim() === ${JSON.stringify(label)}); if (!button) return false; button.click(); return true; })()`);
   assert(result, `Missing article button ${label} for ${href}`);
 }
+async function chooseTestImage(tab, selector) {
+  await tab.eval(`(async () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 8;
+    canvas.getContext('2d').fillRect(0, 0, 8, 8);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const file = new File([blob], 'e2e-image.png', { type: 'image/png' });
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    const input = document.querySelector(${JSON.stringify(selector)});
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await tab.waitFor("!!document.querySelector('img[alt=\"پیش‌نمایش تصویر انتخاب‌شده\"][src^=\"blob:\"]')");
+}
+
 async function getProduct(tab, kind, id) {
   if (kind === "tf2-keys") {
     const listing = await tab.api("/api/tf2-keys");
@@ -252,6 +269,7 @@ with SessionLocal.begin() as db:
       await tab.fill("#float_value", "0.12345678");
       await tab.fill("#stock_quantity", "5");
       await tab.fill("#image_path", "/media/e2e/missing.webp");
+      await chooseTestImage(tab, "#cs2-image-file");
       await tab.fill("#sell", "2.00500000");
       await tab.fill("#buy", "1.25000000");
       await tab.click("form button[type=submit]");
@@ -260,19 +278,67 @@ with SessionLocal.begin() as db:
       assert.equal(cs2.status, 200);
       assert.equal(cs2.body.total, 1);
       state.cs2 = cs2.body.items[0];
+      assert.match(state.cs2.image_path, /^\/media\/cs2\/[a-f0-9]{32}\.webp$/);
+      assert.equal((await tab.api(state.cs2.image_path)).status, 200);
       await tab.goto("/admin/tf2-keys/edit");
       await tab.fill("#stock", "10");
       await tab.fill("#sell", "1.25000000");
       await tab.fill("#buy", "0.75000000");
+      await chooseTestImage(tab, "#tf2-image-file");
       await tab.click("form button[type=submit]");
       await tab.waitFor("location.pathname === '/admin/tf2-keys'");
       const tf2 = await tab.api("/api/admin/tf2-keys");
       assert.equal(tf2.status, 200);
       assert.equal(tf2.body.total, 1);
       state.tf2 = tf2.body.items[0];
+      assert.match(state.tf2.image_path, /^\/media\/tf2\/[a-f0-9]{32}\.webp$/);
+      assert.equal((await tab.api(state.tf2.image_path)).status, 200);
       saveState();
       console.log("PASS browser admin login, dashboard, settings, CS2 and TF2 product creation");
     } finally { await tab.close(); }
+  } else if (phase === "payment-unconfigured") {
+    assert(state.cs2, "Run seed phase first");
+    const admin = await Tab.open(9223, "/admin/settings");
+    const user = await Tab.open(9222, "/login");
+    let prior;
+    try {
+      await login(user, config.user);
+      const settings = await admin.api("/api/admin/settings");
+      assert.equal(settings.status, 200);
+      prior = settings.body;
+      const cleared = await admin.api("/api/admin/settings", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ card_number: null, card_holder_name: null, telegram_username: null, telegram_url: null }),
+      });
+      assert.equal(cleared.status, 200);
+      const added = await user.api("/api/cart/cs2-items", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cs2_item_id: state.cs2.id, quantity: 1 }),
+      });
+      assert.equal(added.status, 200);
+      assert.equal(added.body.payment_instructions_configured, false);
+      await user.goto("/cart");
+      await user.waitFor("document.body.innerText.includes('اطلاعات پرداخت فروشگاه هنوز تکمیل نشده است')");
+      assert.equal(await user.eval("[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'خرید')?.disabled"), true);
+      const rejected = await user.api("/api/orders/finalize", { method: "POST" });
+      assert.equal(rejected.status, 503);
+      assert.equal(rejected.body.detail, "Payment instructions are not configured");
+      console.log("PASS browser cart explains missing payment setup and blocks checkout");
+    } finally {
+      if (prior) {
+        const restored = await admin.api("/api/admin/settings", {
+          method: "PATCH", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            card_number: prior.card_number, card_holder_name: prior.card_holder_name,
+            telegram_username: prior.telegram_username, telegram_url: prior.telegram_url,
+          }),
+        });
+        assert.equal(restored.status, 200);
+      }
+      await user.api(`/api/cart/cs2-items/${state.cs2.id}`, { method: "DELETE" });
+      await user.close();
+      await admin.close();
+    }
   } else if (phase === "purchase") {
     assert(state.cs2 && state.tf2, "Run seed phase first");
     const tab = await Tab.open(9222, "/");
@@ -298,9 +364,9 @@ with SessionLocal.begin() as db:
       await tab.goto("/admin");
       assert(!(await tab.text()).includes("Dashboard"), "normal user cannot access admin navigation");
       const csrfHeaders = { Cookie: `${cookie.name}=${cookie.value}`, "Content-Type": "application/json" };
-      const csrfMissing = await fetch("http://127.0.0.1:8000/api/cart/cs2-items", { method: "POST", headers: csrfHeaders, body: JSON.stringify({ cs2_item_id: state.cs2.id, quantity: 1 }) });
+      const csrfMissing = await fetch(`http://127.0.0.1:${config.api_port}/api/cart/cs2-items`, { method: "POST", headers: csrfHeaders, body: JSON.stringify({ cs2_item_id: state.cs2.id, quantity: 1 }) });
       assert.equal(csrfMissing.status, 403);
-      const csrfWrong = await fetch("http://127.0.0.1:8000/api/cart/cs2-items", { method: "POST", headers: { ...csrfHeaders, Origin: "http://evil.example" }, body: JSON.stringify({ cs2_item_id: state.cs2.id, quantity: 1 }) });
+      const csrfWrong = await fetch(`http://127.0.0.1:${config.api_port}/api/cart/cs2-items`, { method: "POST", headers: { ...csrfHeaders, Origin: "http://evil.example" }, body: JSON.stringify({ cs2_item_id: state.cs2.id, quantity: 1 }) });
       assert.equal(csrfWrong.status, 403);
       await tab.goto("/");
       assert((await tab.text()).includes("IRStore24"));

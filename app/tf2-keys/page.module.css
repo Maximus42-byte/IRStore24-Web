@@ -92,6 +92,11 @@
 
 .keyIcon {
   position: relative;
+  width: min(100%, 360px);
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   color: var(--accent);
 
@@ -391,4 +396,9 @@
 
     flex-direction: column;
   }
+}
+
+.keyIcon img {
+  max-width: 100%;
+  max-height: 300px;
 }

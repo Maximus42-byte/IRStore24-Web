@@ -19,6 +19,7 @@ from app.schemas.orders import (
 from app.services.auth import as_utc, is_currently_banned, utc_now
 from app.services.cart import user_cart
 from app.services.pricing import price_view
+from app.services.settings import payment_instructions_configured
 
 
 MAX_NUMERIC_20_8 = Decimal("999999999999.99999999")
@@ -53,9 +54,7 @@ def finalize_cart(db: Session, user_id: int) -> Order:
     )
     if settings is None:
         raise HTTPException(503, "Exchange rate is not configured")
-    if not settings.card_number or not settings.card_holder_name or not (
-        settings.telegram_username or settings.telegram_url
-    ):
+    if not payment_instructions_configured(settings):
         raise HTTPException(503, "Payment instructions are not configured")
     rate = settings.usdt_toman_rate
     if rate <= 0:

@@ -125,6 +125,7 @@ def configure(harness: Harness, *, rate: str = "100000.00000000") -> None:
         headers=ORIGIN,
     )
     assert response.status_code == 200, response.text
+    assert harness.user.get("/api/cart").json()["payment_instructions_configured"] is True
 
 
 def add_cs2(harness: Harness, quantity: int = 1):
@@ -157,6 +158,7 @@ def test_mixed_cart_add_update_remove_and_no_inventory_reservation(
     assert len(view["cs2_items"]) == len(view["tf2_keys"]) == 1
     assert view["total_price_toman"] is None
     assert view["exchange_rate_configured"] is False
+    assert view["payment_instructions_configured"] is False
     with Session(harness.engine) as db:
         assert db.get(CS2Item, harness.cs2_id).stock_quantity == 3
         assert db.get(TF2Key, harness.tf2_id).stock_quantity == 5
@@ -289,7 +291,12 @@ def test_finalization_requires_payment_setup_and_rejects_forged_values(
         headers=ORIGIN,
     )
     assert response.status_code == 200
-    assert finalize(harness).status_code == 503
+    cart = harness.user.get("/api/cart").json()
+    assert cart["exchange_rate_configured"] is True
+    assert cart["payment_instructions_configured"] is False
+    missing = finalize(harness)
+    assert missing.status_code == 503
+    assert missing.json()["detail"] == "Payment instructions are not configured"
     assert harness.user.post(
         "/api/orders/finalize",
         json={"total_price_toman": "1"}, headers=ORIGIN,

@@ -1,6 +1,11 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 from decimal import Decimal
+from io import BytesIO
+from pathlib import Path
+import re
+
+from PIL import Image
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,6 +16,7 @@ from sqlalchemy.pool import StaticPool
 
 import app.models  # noqa: F401
 from app.core.database import Base, get_db
+from app.core.config import settings
 from app.core.security import SESSION_COOKIE_NAME, hash_password, login_attempt_limiter
 from app.main import app
 from app.models.cs2_item import CS2Item
@@ -423,3 +429,165 @@ def test_admin_change_missing_resources_and_invalid_ban_shape(harness: Harness) 
         "/api/admin/users/999/ban",
         json={"type": "permanent", "duration_minutes": 1}, headers=ORIGIN,
     ).status_code == 422
+
+
+def image_bytes(format: str = "PNG", size: tuple[int, int] = (8, 8), *, exif=False) -> bytes:
+    image = Image.new("RGB", size, "red")
+    output = BytesIO()
+    metadata = Image.Exif()
+    metadata[271] = "Private camera metadata"
+    image.save(output, format=format, **({"exif": metadata} if exif else {}))
+    return output.getvalue()
+
+
+def test_admin_upload_rewrites_formats_and_strips_metadata(
+    harness: Harness, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "media_root", tmp_path)
+    for format in ("JPEG", "PNG", "WEBP"):
+        response = harness.client.post(
+            "/api/admin/media/cs2", content=image_bytes(format, exif=format == "JPEG"),
+            headers={**ORIGIN, "Content-Type": "application/octet-stream"},
+        )
+        assert response.status_code == 201, response.text
+        path = response.json()["path"]
+        assert re.fullmatch(r"/media/cs2/[a-f0-9]{32}\.webp", path)
+        saved = tmp_path / path.removeprefix("/media/")
+        assert saved.is_file()
+        assert saved.stat().st_mode & 0o777 == 0o644
+        with Image.open(saved) as image:
+            assert image.format == "WEBP"
+            assert image.size == (8, 8)
+            assert not image.getexif()
+            assert "exif" not in image.info
+        assert b"Private camera metadata" not in saved.read_bytes()
+        assert harness.client.get(path).status_code == 200
+
+
+def test_upload_requires_admin_and_trusted_origin(
+    harness: Harness, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "media_root", tmp_path)
+    content = image_bytes()
+    with TestClient(app, base_url="https://irstore24.ir") as anonymous:
+        assert anonymous.post("/api/admin/media/tf2", content=content, headers=ORIGIN).status_code == 401
+    with Session(harness.engine) as db:
+        db.add(User(
+            email="customer@example.com", password_hash=hash_password(PASSWORD),
+            role="user", is_active=True, is_banned=False,
+        ))
+        db.commit()
+    with TestClient(app, base_url="https://irstore24.ir") as customer:
+        assert customer.post(
+            "/api/auth/login",
+            json={"email": "customer@example.com", "password": PASSWORD},
+            headers=ORIGIN,
+        ).status_code == 200
+        assert customer.post("/api/admin/media/tf2", content=content, headers=ORIGIN).status_code == 403
+    assert harness.client.post("/api/admin/media/tf2", content=content).status_code == 403
+    assert harness.client.post(
+        "/api/admin/media/tf2", content=content,
+        headers={"Origin": "https://evil.example"},
+    ).status_code == 403
+    assert list(tmp_path.rglob("*.webp")) == []
+
+
+@pytest.mark.parametrize("content", [
+    b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+    b"MZ" + b"executable" * 20,
+    b"\x89PNG\r\n\x1a\n" + b"broken",
+    b"x" * (768 * 1024 + 1),
+    image_bytes(size=(4097, 1)),
+])
+def test_upload_rejects_malicious_oversize_and_large_dimensions(
+    harness: Harness, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, content: bytes,
+) -> None:
+    monkeypatch.setattr(settings, "media_root", tmp_path)
+    response = harness.client.post(
+        "/api/admin/media/tf2", content=content,
+        headers={**ORIGIN, "Content-Type": "image/png"},
+    )
+    assert response.status_code in (413, 415, 422), response.text
+    assert list(tmp_path.rglob("*.webp")) == []
+
+
+def test_tf2_image_reference_persists_and_replacement_never_deletes_files(
+    harness: Harness, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "media_root", tmp_path)
+    paths = []
+    for _ in range(2):
+        response = harness.client.post(
+            "/api/admin/media/tf2", content=image_bytes(), headers=ORIGIN,
+        )
+        assert response.status_code == 201, response.text
+        paths.append(response.json()["path"])
+    created = harness.client.post(
+        "/api/admin/tf2-keys", json=tf2_payload(image_path=paths[0]), headers=ORIGIN,
+    )
+    assert created.status_code == 201, created.text
+    item_id = created.json()["id"]
+    assert created.json()["image_path"] == paths[0]
+    assert harness.client.get("/api/tf2-keys").json()["items"][0]["image_path"] == paths[0]
+    assert harness.client.patch(
+        f"/api/admin/tf2-keys/{item_id}", json={"image_path": paths[1]}, headers=ORIGIN,
+    ).json()["image_path"] == paths[1]
+    assert harness.client.patch(
+        f"/api/admin/tf2-keys/{item_id}", json={"image_path": None}, headers=ORIGIN,
+    ).json()["image_path"] is None
+    with Session(harness.engine) as db:
+        assert db.get(TF2Key, item_id).image_path is None
+    assert all((tmp_path / path.removeprefix("/media/")).exists() for path in paths)
+    assert harness.client.delete("/api/admin/media/tf2", headers=ORIGIN).status_code == 405
+    assert harness.client.post(
+        "/api/admin/tf2-keys", json=tf2_payload(image_path="/media/../secret"),
+        headers=ORIGIN,
+    ).status_code == 422
+
+
+def test_upload_refuses_symlink_directory(
+    harness: Harness, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    root = tmp_path / "media"
+    root.mkdir()
+    (root / "tf2").symlink_to(outside, target_is_directory=True)
+    monkeypatch.setattr(settings, "media_root", root)
+    response = harness.client.post(
+        "/api/admin/media/tf2", content=image_bytes(), headers=ORIGIN,
+    )
+    assert response.status_code == 503
+    assert list(outside.iterdir()) == []
+    (outside / "secret.webp").write_bytes(image_bytes("WEBP"))
+    assert harness.client.get("/media/tf2/secret.webp").status_code == 404
+
+
+def test_cs2_image_reference_can_be_replaced_and_removed_without_file_deletion(
+    harness: Harness, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "media_root", tmp_path)
+    uploaded = harness.client.post(
+        "/api/admin/media/cs2", content=image_bytes(), headers=ORIGIN,
+    )
+    assert uploaded.status_code == 201
+    path = uploaded.json()["path"]
+    item_id = create_cs2(harness, image_path=path).json()["id"]
+    assert harness.client.get("/api/cs2-items/ak-redline").json()["image_path"] == path
+    assert harness.client.patch(
+        f"/api/admin/cs2-items/{item_id}", json={"image_path": None}, headers=ORIGIN,
+    ).json()["image_path"] is None
+    assert (tmp_path / path.removeprefix("/media/")).is_file()
+    assert harness.client.get("/media/cs2/../secret.webp").status_code == 404
+    assert harness.client.get("/media/cs2/not-there.webp").status_code == 404
+
+
+def test_legacy_top_level_cs2_media_reference_remains_editable(harness: Harness) -> None:
+    created = create_cs2(harness, image_path="/media/legacy.webp")
+    assert created.status_code == 201, created.text
+    updated = harness.client.patch(
+        f"/api/admin/cs2-items/{created.json()['id']}",
+        json={"name": "Updated legacy item"}, headers=ORIGIN,
+    )
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["image_path"] == "/media/legacy.webp"

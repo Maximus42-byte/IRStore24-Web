@@ -1,6 +1,11 @@
 # Docker Compose loads this file automatically for local development.
 # Production commands must explicitly select docker-compose.yml alone.
 services:
+  api:
+    volumes: !override
+      - type: bind
+        source: ./backend/container-media
+        target: /app/media
   db:
     ports:
       - "127.0.0.1:5432:5432"

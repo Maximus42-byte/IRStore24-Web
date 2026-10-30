@@ -45,6 +45,7 @@ class CartView(BaseModel):
     total_price_toman: Decimal | None
     total_price_usdt: Decimal | None
     exchange_rate_configured: bool
+    payment_instructions_configured: bool
 
 
 class FinalizeRequest(BaseModel):

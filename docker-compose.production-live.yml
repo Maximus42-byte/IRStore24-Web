@@ -1,0 +1,10 @@
+# Apply after docker-compose.staging.yml only for the live irstore24-staging project.
+# Keep the live project ports and PostgreSQL volume while matching host Nginx media.
+services:
+  api:
+    volumes: !override
+      - type: bind
+        source: /srv/irstore24/media
+        target: /app/media
+        bind:
+          create_host_path: false
